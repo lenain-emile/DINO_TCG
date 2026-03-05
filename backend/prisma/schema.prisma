@@ -1,0 +1,203 @@
+// =========================================================
+// DINO TCG — Prisma Schema
+// =========================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =========================================================
+// 1) ACCOUNT
+// =========================================================
+model Account {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("user")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  gamers Gamer[]
+
+  @@index([email], map: "idx_account_email")
+  @@map("account")
+}
+
+// =========================================================
+// 2) GAMER (profil joueur lié à un account)
+// =========================================================
+model Gamer {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  name      String
+  level     Int      @default(1)
+  nbCredit  Int      @default(0) @map("nb_credit")
+  xp        Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  account          Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  decks            Deck[]
+  playerCards      PlayerCard[]
+  boosterDetained  BoosterDetained[]
+
+  @@unique([accountId, name], map: "uq_gamer_account_name")
+  @@index([accountId], map: "idx_gamer_account_id")
+  @@map("gamer")
+}
+
+// =========================================================
+// 3) RARITY
+// =========================================================
+model Rarity {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  probability Decimal @db.Decimal(6, 5)
+
+  cards Card[]
+
+  @@map("rarity")
+}
+
+// =========================================================
+// 4) SPECIAL EFFECT
+// =========================================================
+model SpecialEffect {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  description String?
+  damage      Int     @default(0)
+  boostLife   Int     @default(0) @map("boost_life")
+
+  cards Card[]
+
+  @@map("special_effect")
+}
+
+// =========================================================
+// 5) CARD
+// =========================================================
+model Card {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  type            String
+  priceMana       Int      @default(0) @map("price_mana")
+  atk             Int      @default(0)
+  def             Int      @default(0)
+  life            Int      @default(0)
+  image           String?
+  rarityId        String   @map("rarity_id") @db.Uuid
+  specialEffectId String?  @map("special_effect_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  rarity        Rarity         @relation(fields: [rarityId], references: [id], onDelete: Restrict)
+  specialEffect SpecialEffect? @relation(fields: [specialEffectId], references: [id], onDelete: SetNull)
+  deckCards     DeckCard[]
+  playerCards   PlayerCard[]
+
+  @@unique([name, type], map: "uq_card_name_type")
+  @@index([rarityId], map: "idx_card_rarity_id")
+  @@index([specialEffectId], map: "idx_card_special_effect_id")
+  @@index([type], map: "idx_card_type")
+  @@map("card")
+}
+
+// =========================================================
+// 6) DECK
+// =========================================================
+model Deck {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  gamerId   String   @map("gamer_id") @db.Uuid
+  name      String
+  isActive  Boolean  @default(false) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  gamer     Gamer      @relation(fields: [gamerId], references: [id], onDelete: Cascade)
+  deckCards DeckCard[]
+
+  @@unique([gamerId, name], map: "uq_deck_gamer_name")
+  @@index([gamerId], map: "idx_deck_gamer_id")
+  @@map("deck")
+}
+
+// =========================================================
+// 7) DECK_CARD (relation deck <-> card)
+// =========================================================
+model DeckCard {
+  deckId   String @map("deck_id") @db.Uuid
+  cardId   String @map("card_id") @db.Uuid
+  quantity Int    @default(1)
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Restrict)
+
+  @@id([deckId, cardId])
+  @@index([cardId], map: "idx_deck_card_card_id")
+  @@map("deck_card")
+}
+
+// =========================================================
+// 8) PLAYER_CARD (collection du gamer)
+// =========================================================
+model PlayerCard {
+  gamerId    String   @map("gamer_id") @db.Uuid
+  cardId     String   @map("card_id") @db.Uuid
+  quantity   Int      @default(1)
+  acquiredAt DateTime @default(now()) @map("acquired_at") @db.Timestamptz
+
+  gamer Gamer @relation(fields: [gamerId], references: [id], onDelete: Cascade)
+  card  Card  @relation(fields: [cardId], references: [id], onDelete: Restrict)
+
+  @@id([gamerId, cardId])
+  @@index([cardId], map: "idx_player_card_card_id")
+  @@map("player_card")
+}
+
+// =========================================================
+// 9) BOOSTER_TYPE
+// =========================================================
+model BoosterType {
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name  String @unique
+  price Int    @default(0)
+
+  boosters Booster[]
+
+  @@map("booster_type")
+}
+
+// =========================================================
+// 10) BOOSTER
+// =========================================================
+model Booster {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  boosterTypeId String? @map("booster_type_id") @db.Uuid
+  name          String  @unique
+  price         Int     @default(0)
+
+  boosterType     BoosterType?      @relation(fields: [boosterTypeId], references: [id], onDelete: SetNull)
+  boosterDetained BoosterDetained[]
+
+  @@index([boosterTypeId], map: "idx_booster_type_id")
+  @@map("booster")
+}
+
+// =========================================================
+// 11) BOOSTER_DETAINED (booster possédé par le gamer)
+// =========================================================
+model BoosterDetained {
+  gamerId   String @map("gamer_id") @db.Uuid
+  boosterId String @map("booster_id") @db.Uuid
+  quantity  Int    @default(0)
+
+  gamer   Gamer   @relation(fields: [gamerId], references: [id], onDelete: Cascade)
+  booster Booster @relation(fields: [boosterId], references: [id], onDelete: Restrict)
+
+  @@id([gamerId, boosterId])
+  @@index([boosterId], map: "idx_booster_detained_booster_id")
+  @@map("booster_detained")
+}
