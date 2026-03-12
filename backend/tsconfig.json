@@ -35,5 +35,8 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  // On indique explicitement que seul le dossier src est compilé vers dist.
+  // prisma.config.ts est géré par Prisma CLI séparément.
+  "include": ["src"]
 }
