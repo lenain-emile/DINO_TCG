@@ -1,0 +1,55 @@
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### Health check (optionnel)
+GET {{baseUrl}}/health
+
+### Register - succès
+# @name registerSuccess
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Emile Test",
+  "email": "emile.test@example.com",
+  "password": "MotDePasse123!"
+}
+
+### Register - email déjà pris (doit renvoyer 409)
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Emile Test 2",
+  "email": "emile.test@example.com",
+  "password": "AutrePass123!"
+}
+
+### Register - champs vides (doit renvoyer 400)
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "",
+  "email": "",
+  "password": ""
+}
+
+### Login - succès
+# @name loginSuccess
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "emile.test@example.com",
+  "password": "MotDePasse123!"
+}
+
+### Login - mauvais mot de passe (doit renvoyer 401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "emile.test@example.com",
+  "password": "WrongPassword!"
+}

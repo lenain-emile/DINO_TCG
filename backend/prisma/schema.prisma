@@ -22,10 +22,28 @@ model Account {
   role         String   @default("user")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  gamers Gamer[]
+  gamers        Gamer[]
+  refreshTokens RefreshToken[]
 
   @@index([email], map: "idx_account_email")
   @@map("account")
+}
+
+model RefreshToken {
+  id           String    @id @db.Uuid
+  accountId    String    @map("account_id") @db.Uuid
+  tokenHash    String    @map("token_hash")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz
+  replacedById String?   @map("replaced_by_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId], map: "idx_refresh_token_account_id")
+  @@index([expiresAt], map: "idx_refresh_token_expires_at")
+  @@index([revokedAt], map: "idx_refresh_token_revoked_at")
+  @@map("refresh_token")
 }
 
 // =========================================================

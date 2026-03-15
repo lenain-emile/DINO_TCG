@@ -1,16 +1,26 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { env } from "./config/env";
+import { authRouter } from "./routes/auth.routes";
+import { errorHandler, notFoundHandler } from "./middlewares/error.middleware";
 
 const app = express();
-const PORT = process.env["PORT"] ?? 3000;
+const PORT = env.port;
 
 app.use(cors());
 app.use(express.json());
 
-// TODO: importer et monter les routes ici
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "API is running",
+  });
+});
+
+app.use("/api/auth", authRouter);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
