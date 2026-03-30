@@ -2,12 +2,26 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import IntroDino from './Intro-dino/intro'
 
 function App() {
   const [count, setCount] = useState(0)
 
+  // 1. État (State) pour savoir si on doit afficher l'intro
+  // Mettre à "true" par défaut pour qu'elle s'affiche au lancement du site
+  const [afficherIntro, setAfficherIntro] = useState(true)
+
   return (
     <>
+      {/* 2. Affichage conditionnel de l'intro */}
+      {afficherIntro && (
+        <IntroDino 
+          dureeEnMillisecondes={6000} // On fixe la durée ici de manière très lisible
+          surIntroTerminee={() => setAfficherIntro(false)} // Quand l'intro dit "stop", on cache le composant
+        />
+      )}
+
+      {/* 3. Le reste du jeu (qui fonctionnera en fond le temps de l'intro) */}
       <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
