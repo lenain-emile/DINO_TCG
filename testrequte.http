@@ -11,8 +11,8 @@ Content-Type: {{contentType}}
 
 {
   "name": "Emile Test",
-  "email": "emile.test@example.com",
-  "password": "MotDePasse123!"
+  "email": "emi.test@example.com",
+  "password": "MotDePasse1234!"
 }
 
 ### Register - email déjà pris (doit renvoyer 409)

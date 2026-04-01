@@ -51,6 +51,9 @@ function sanitizeName(name: string): string {
   return name.trim();
 }
 
+const STARTER_BOOSTER_QUANTITY = 1;
+const UNOPENED_BOOSTER_NAME = "Booster a choisir";
+
 export async function register(req: Request<unknown, unknown, RegisterBody>, res: Response, next: NextFunction): Promise<void> {
   try {
     const name = req.body.name ? sanitizeName(req.body.name) : "";
@@ -72,26 +75,51 @@ export async function register(req: Request<unknown, unknown, RegisterBody>, res
 
     const passwordHash = await hashPassword(password);
 
-    const account = await prisma.account.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-    });
+    const account = await prisma.$transaction(async (tx) => {
+      const createdAccount = await tx.account.create({
+        data: {
+          name,
+          email,
+          passwordHash,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      });
 
-    await prisma.gamer.create({
-      data: {
-        accountId: account.id,
-        name,
-      },
+      const gamer = await tx.gamer.create({
+        data: {
+          accountId: createdAccount.id,
+          name,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const unopenedBooster = await tx.booster.upsert({
+        where: { name: UNOPENED_BOOSTER_NAME },
+        update: {},
+        create: {
+          name: UNOPENED_BOOSTER_NAME,
+          price: 0,
+        },
+        select: { id: true },
+      });
+
+      await tx.boosterDetained.create({
+        data: {
+          gamerId: gamer.id,
+          boosterId: unopenedBooster.id,
+          quantity: STARTER_BOOSTER_QUANTITY,
+        },
+      });
+
+      return createdAccount;
     });
 
     res.status(201).json({
