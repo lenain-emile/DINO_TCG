@@ -1,11 +1,9 @@
-export interface CardTCGProps {
-  name: string;
-  type: string;
-  image?: string;
-  atk: number;
-  def: number;
-  life: number;
-  priceMana: number;
-  rarity: string;
-  specialEffect?: string;
+export interface Dinosaur {
+  id: number;
+  nom: string;
+  faction: string;
+  rarete: string;
+  attaque: number;
+  defense: number;
+  points_de_vie: number;
 }
