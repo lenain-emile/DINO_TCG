@@ -1,0 +1,65 @@
+30/03/2026
+
+
+OK 👍
+S0-01 : Initialiser repo + structure dossiers
+S0-02 : Setup Frontend React + TypeScript + Routing
+S0-04 : DB PostgreSQL + ORM + migrations
+
+A finir ➕
+Poids trello/membres
+Maquette
+Architecture à check
+Read me à fignoler
+
+A faire 💯
+Diagramme de cas d’utilisation (S0-08)
+Diagramme de classes (S0-08)
+Choix techniques (S0-08)
+Swagger (S0-05)
+Postman (S0-06)
+Sécurité (S0-07)
+SPRINT 1 - MVP + Auth + Booster + Collection (minimum back)
+Doc partagée pour le groupe
+
+
+Check pour le prochain point 01/04/2026
+
+conception ok 
+architecture ok
+read me ok
+diagramme ok
+choix techniques ok 
+SPRINT 1 - MVP + Auth + Booster + Collection ok backend minimum
+
+
+Conception presque terminée, à finir pour le 01/04/2026, sprint 1 à faire 
+
+
+
+
+
+
+03/04/2026
+
+OK 
+inscription / connexion
+base de donnnées
+cartes collections
+maquettes
+docs 
+debut logique métier (booster à la connexion)
+
+A finir 
+ouverture booster
+refresh token
+
+A faire
+collection postman
+end point
+front accueil/connexion/collection/boutique/navbar
+
+
+Attribution des tickets pour meilleure organisation, initialisation de swagger pour le sprint 2 (pas necessaire jusqu’à là). 
+Pour sprint 2, collection postman à faire, continuer la logique métier, création des premiers composants
+
