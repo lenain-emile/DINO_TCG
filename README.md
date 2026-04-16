@@ -1,10 +1,9 @@
 # DINO TCG
 
-Application fullstack de jeu de cartes à collectionner (Trading Card Game) en ligne, développée dans le cadre d'un projet fil rouge de 4 semaines en équipe de 3.
+Application fullstack de jeu de cartes à collectionner (Trading Card Game) en ligne, développée dans le cadre d'un projet fil rouge de 4 semaines par Emile Lenain, Oussama Halima Filali & Armelle Pouzioux.
 
-## Contexte
 
-**TCG Arena** est une startup souhaitant lancer un TCG en ligne. Les joueurs collectionnent des cartes, construisent des decks et s'affrontent en duel stratégique.
+**DINO TCG** est un jeu de cartes stratégique où les joueurs s'affrontent en utilisant les créatures les plus redoutables de la préhistoire. Les joueurs collectionnent des dinosaures, construisent des decks synergiques et s'affrontent en duel.
 
 L'objectif est de livrer un MVP fullstack avec une architecture propre et maintenable.
 
@@ -12,14 +11,14 @@ L'objectif est de livrer un MVP fullstack avec une architecture propre et mainte
 
 | Couche | Technologie |
 |---|---|
-| Frontend | React 19 + TypeScript + Vite |
-| Backend | Node.js + Express 5 + TypeScript |
-| Routing | React Router DOM v7 |
+| Frontend | React + TypeScript + Vite |
+| Backend | Node.js + Express + TypeScript |
+| Routing | React Router DOM |
 | API | REST — documentée avec Swagger |
 
 ## Structure du projet
 
-```
+```text
 DINO_TCG/
   client/     # Frontend React
   backend/    # API Express
@@ -37,26 +36,26 @@ cd backend && npm install && npm run dev
 
 ## Univers du jeu
 
-Quatre factions s'affrontent :
+Cinq grandes familles de dinosaures s'affrontent pour la domination du territoire :
 
 | Faction | Spécialité |
 |---|---|
-| Feu | Dégâts directs élevés |
-| Eau | Contrôle et défense |
-| Terre | Résistance et endurance |
-| Air | Vitesse et esquive |
+| **Théropodes** | Dégâts massifs et agressivité |
+| **Sauropodes** | Tanks ultimes, immenses réserves de points de vie |
+| **Cératopsiens** | Équilibre parfait entre attaque et robustesse |
+| **Thyréophores** | Défense lourdement armée et ripostes |
+| **Ornithopodes** | Polyvalence et dynamique de groupe |
 
 ## Structure d'une carte
 
-| Attribut | Valeur |
+| Attribut | Description & Valeurs |
 |---|---|
-| Nom | Identifiant unique |
-| Faction | Feu / Eau / Terre / Air |
-| Coût en mana | 1 à 10 |
-| Points d'attaque | 0 à 15 |
-| Points de défense | 0 à 15 |
-| Rareté | Commune, Rare, Épique, Légendaire |
-| Effet spécial | Optionnel |
+| `nom` | Identifiant de la carte (ex: Velociraptor) |
+| `faction` | Théropodes, Sauropodes, Cératopsiens, Thyréophores ou Ornithopodes |
+| `cout_energie` | De 1 à 10 |
+| `attaque` | De 1 à 18 |
+| `points_de_vie` | De 1 à 30 |
+| `rarete` | Commune, Rare, Épique, Légendaire |
 
 ## Règles du deck
 
@@ -66,8 +65,8 @@ Quatre factions s'affrontent :
 
 ## Déroulement d'un duel
 
-1. Chaque joueur commence avec **20 PV** et **3 mana**
-2. À chaque tour : **+1 mana** (max 10) + pioche d'1 carte
-3. Le joueur joue des cartes selon son mana disponible
-4. Les cartes attaquent les cartes adverses ou le joueur directement
-5. **Victoire** : réduire les PV adverses à 0
+1. Chaque joueur commence avec **20 PV** et **3 énergies**
+2. À chaque tour : **+1 énergie** (max 10) + pioche d'1 carte
+3. Le joueur invoque des dinosaures selon son énergie disponible
+4. Les dinosaures attaquent les cartes adverses ou le joueur directement
+5. **Victoire** : réduire les PV du joueur adverse à 0
