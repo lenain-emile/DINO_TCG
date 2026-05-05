@@ -116,6 +116,7 @@ model Card {
   specialEffect SpecialEffect? @relation(fields: [specialEffectId], references: [id], onDelete: SetNull)
   deckCards     DeckCard[]
   playerCards   PlayerCard[]
+  boosterCards  BoosterCard[]
 
   @@unique([name, type], map: "uq_card_name_type")
   @@index([rarityId], map: "idx_card_rarity_id")
@@ -199,9 +200,25 @@ model Booster {
 
   boosterType     BoosterType?      @relation(fields: [boosterTypeId], references: [id], onDelete: SetNull)
   boosterDetained BoosterDetained[]
+  boosterCards    BoosterCard[]
 
   @@index([boosterTypeId], map: "idx_booster_type_id")
   @@map("booster")
+}
+
+// =========================================================
+// 11b) BOOSTER_CARD (pool de cartes d'un booster)
+// =========================================================
+model BoosterCard {
+  boosterId String @map("booster_id") @db.Uuid
+  cardId    String @map("card_id") @db.Uuid
+
+  booster Booster @relation(fields: [boosterId], references: [id], onDelete: Cascade)
+  card    Card    @relation(fields: [cardId], references: [id], onDelete: Restrict)
+
+  @@id([boosterId, cardId])
+  @@index([cardId], map: "idx_booster_card_card_id")
+  @@map("booster_card")
 }
 
 // =========================================================

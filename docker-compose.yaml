@@ -1,0 +1,25 @@
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 6666:5432
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: tcg_bdd
+    volumes:
+      - ./data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 7777:8080
+
+
+volumes:
+  data:
