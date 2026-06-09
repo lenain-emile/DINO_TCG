@@ -8,14 +8,41 @@ Application fullstack de jeu de cartes à collectionner (Trading Card Game) en l
 
 L'objectif est de livrer un MVP fullstack avec une architecture propre et maintenable.
 
-## Stack technique
+## 🛠️ Stack technique & Configuration
 
-| Couche | Technologie |
-|---|---|
-| Frontend | React 19 + TypeScript + Vite |
-| Backend | Node.js + Express 5 + TypeScript |
-| Routing | React Router DOM v7 |
-| API | REST — documentée avec Swagger |
+### Frontend (Client)
+- **Cœur** : React 19 + TypeScript + Vite
+- **Stylisation** : TailwindCSS
+- **Routing** : React Router DOM v7
+- **3D & Intro** : Three.js, `@react-three/fiber`, `@react-three/drei`
+
+### Backend (Serveur)
+- **Cœur API** : Node.js + Express 5 + TypeScript
+- **Base de données** : PostgreSQL hébergé sur **Supabase**
+- **ORM** : **Prisma** (v7) (configuration via `prisma.config.ts`, utilisation de Pooler `pgbouncer` pour Supabase)
+- **Sécurité/Auth** : `bcryptjs` (hachage) + `jsonwebtoken` (JWT)
+
+---
+
+## 🔐 Validation de l'Authentification & Fonctionnement du Token (JWT)
+
+Le système sécurise les accès via deux éléments :
+1. **Access Token** : Badge "rapide" crypté via la clé `JWT_SECRET` (dans le `.env`). C'est ce **token principal** qui valide le développement et que le frontend utilise pour faire des requêtes.
+2. **Refresh Token** : Conservé de manière sécurisée en base de données pour régénérer le badge rapide sans reconnexion.
+
+### Comment tester (Flux de développement) :
+1. **S'inscrire (`POST /api/auth/register`)** : 
+   Envoie un email/password. Le mot de passe est haché en BDD. Le serveur te retourne tes premiers tokens.
+2. **Se connecter (`POST /api/auth/login`)** : 
+   Envoie tes identifiants. Si c'est bon, le serveur te retourne un `accessToken`.
+3. **Prouver son identité (`GET /api/auth/me`)** :
+   Copie l'`accessToken` fourni, et passe-le dans les *Headers HTTP* de ta requête de cette façon :
+   ```http
+   Authorization: Bearer <TON_ACCESS_TOKEN>
+   ```
+Si le serveur répond avec ton profil utilisateur, c'est que la clé secrète du `.env` a bien authentifié ton jeton. Le système d'authentification est totalement fonctionnel !
+
+---
 
 ## Structure du projet
 
