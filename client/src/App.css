@@ -1,42 +1,57 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.dino-app {
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.spiral-screen {
+  pointer-events: none;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.spiral {
+  position: absolute;
+  inset: -25vmin;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      color-mix(in oklab, var(--foreground) 18%, transparent) 0 10deg,
+      transparent 10deg 20deg
+    );
+  mask-image: radial-gradient(circle at 50% 50%, black 0 55%, transparent 72%);
+  transform-origin: 50% 50%;
+  animation: spiral-in 1100ms ease-out forwards;
+}
+
+.spiral-fade {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--background) 70%, transparent);
+  animation: spiral-fade 1100ms ease-out forwards;
+}
+
+@keyframes spiral-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) rotate(-30deg);
+    filter: blur(8px);
   }
-  to {
-    transform: rotate(360deg);
+  40% {
+    opacity: 1;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25) rotate(180deg);
+    filter: blur(0px);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes spiral-fade {
+  0% {
+    opacity: 0;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
 }

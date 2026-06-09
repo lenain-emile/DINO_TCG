@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 GlesCroc/
+
+# Vidéos lourdes (trop volumineuses pour git — gardées en local)
+*.mov

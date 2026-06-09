@@ -1,66 +1,159 @@
-import { Canvas } from '@react-three/fiber'
-import { Suspense, useEffect } from 'react'
-import type { WebGLRenderer } from 'three'
-import ChargeurDino from './dino-load'
-
-// 1. Définition des propriétés (Types en français)
-export type ProprietesIntro = {
-  // Fonction appelée par le parent (App.tsx) quand l'intro est terminée
-  surIntroTerminee: () => void;
-  // Durée totale de l'intro en millisecondes. Scalable (facile à changer depuis App.tsx)
-  dureeEnMillisecondes?: number;
-}
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Composant : IntroDino
- * Rôle : Gérer la caméra, la lumière et la scène 3D pour filmer le dinosaure.
- * C'est une intro stricte type "film", sans bouton, qui se coupe toute seule.
+ * Intro vidéo plein écran (cutscene).
+ *
+ * Objectifs :
+ * - Remplacer totalement l’intro 3D (pas de WebGL, donc moins de bugs/perf).
+ * - Lecture automatique quand c’est possible.
+ * - Fin automatique : soit à la fin de la vidéo, soit via un timeout de sécurité.
+ * - Contrôle du cadrage ("angle de vue") via `object-position`.
  */
-export default function IntroDino({ 
-  surIntroTerminee, 
-  dureeEnMillisecondes = 9000 // Fin de l'intro après 9 secondes par défaut
+
+export type IntroVideoProps = {
+  /** Callback appelé quand l'intro doit disparaître. */
+  onDone: () => void;
+
+  /** Timeout de sécurité (ms) si la vidéo ne se lance pas ou ne déclenche pas 'ended'. */
+  maxDurationMs?: number;
+
+  /** Chemin public de la vidéo (fichier dans `client/public`). */
+  src?: string;
+
+  /** Optionnel: version MP4 (recommandée pour Chrome/Firefox/Edge). */
+  mp4Src?: string;
+
+  /** Optionnel: version WebM (encore plus compatible/perf selon navigateur). */
+  webmSrc?: string;
+
+  /** Cadrage CSS : ex "50% 50%" (centre), "50% 35%" (plus haut), etc. */
+  view?: string;
+
+  /** Vitesse de lecture de la vidéo (1 = normal). */
+  rate?: number;
+};
+
+// Backward-compat : App.tsx importe encore `IntroDino`.
+export type ProprietesIntro = {
+  surIntroTerminee: () => void;
+  dureeEnMillisecondes?: number;
+  src?: string;
+  mp4Src?: string;
+  webmSrc?: string;
+  objectPosition?: string;
+  playbackRate?: number;
+};
+
+export default function IntroDino({
+  surIntroTerminee,
+  dureeEnMillisecondes = 9000,
+  // Fallback si jamais MP4 ne se charge pas (rare)
+  src = "/Model/Comp_1.mov",
+  // Source principale (compatible Chrome/Firefox/Edge)
+  mp4Src = "/Model/Comp_1.mp4",
+  webmSrc,
+  objectPosition = "50% 50%",
+  playbackRate = 1,
 }: ProprietesIntro) {
-
-  // 2. Gestion du temps (Timer)
-  useEffect(() => {
-    // Dès l'affichage, on lance un chronomètre
-    const chrono = setTimeout(() => {
-      // Le temps imparti est écoulé, on prévient l'application de retirer l'intro
-      surIntroTerminee()
-    }, dureeEnMillisecondes)
-
-    // Nettoyage de sécurité
-    return () => clearTimeout(chrono)
-  }, [surIntroTerminee, dureeEnMillisecondes])
-
-  // 3. Rendu de la scène 3D
   return (
-    // Conteneur vert en plein écran absolu (On utilise "style" pour forcer le plein écran passe outre les conflits de l'App)
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, backgroundColor: 'Green' }}>
-      {/* 
-        Le Canvas (React Three Fiber).
-        Camera reculée (z: 10) et un poil en hauteur (y: 3.5) pour voir le dino en entier
-      */}
-      <Canvas
-        style={{ display: 'block', width: '100%', height: '100%' }}
-        camera={{ position: [0, 3.5, 10], fov: 45 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: false }}
-        onCreated={({ gl }: { gl: WebGLRenderer }) => {
-          // On met un beau fond vert semblable à ta photo au lieu du noir complet
-          gl.setClearColor('#4a8f5e', 1) 
+    <IntroVideo
+      onDone={surIntroTerminee}
+      maxDurationMs={dureeEnMillisecondes}
+      src={src}
+      mp4Src={mp4Src}
+      webmSrc={webmSrc}
+      view={objectPosition}
+      rate={playbackRate}
+    />
+  );
+}
+
+function IntroVideo({
+  onDone,
+  maxDurationMs = 9000,
+  src = "/Model/Comp_1.mov",
+  mp4Src,
+  webmSrc,
+  view = "50% 50%",
+  rate = 1,
+}: IntroVideoProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const doneOnceRef = useRef(false);
+  const [videoError, setVideoError] = useState(false);
+
+  const finish = useCallback(() => {
+    if (doneOnceRef.current) return;
+    doneOnceRef.current = true;
+    onDone();
+  }, [onDone]);
+
+  // 1) Applique la vitesse + tente l’autoplay.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.playbackRate = rate;
+
+    // Si autoplay est bloqué, on ne force pas :
+    // le timeout de sécurité terminera l’intro.
+    void video.play().catch(() => {
+      // no-op
+    });
+  }, [rate]);
+
+  // 2) Fin automatique (ended + timeout).
+  useEffect(() => {
+    const video = videoRef.current;
+
+    const handleEnded = () => finish();
+    if (video) video.addEventListener("ended", handleEnded);
+
+    const timer = window.setTimeout(() => finish(), maxDurationMs);
+
+    return () => {
+      window.clearTimeout(timer);
+      if (video) video.removeEventListener("ended", handleEnded);
+    };
+  }, [finish, maxDurationMs]);
+
+  return (
+    <div className="fixed inset-0 z-[9999] overflow-hidden bg-background" aria-hidden>
+      {/* Vidéo plein écran */}
+      <video
+        ref={videoRef}
+        className="h-full w-full object-cover"
+        style={{ objectPosition: view }}
+        muted
+        playsInline
+        autoPlay
+        preload="auto"
+        onError={() => {
+          setVideoError(true);
         }}
       >
-        {/* Lumières douces pour un rendu plus esthétique (sans ombres dures) */}
-        <ambientLight intensity={2.0} />
-        <directionalLight position={[5, 10, 5]} intensity={1.5} />
-        <directionalLight position={[-5, 2, -5]} intensity={1.0} /> 
-        
-        {/* Suspense "met en pause" le rendu 3D le temps que le fichier .glb soit téléchargé */}
-        <Suspense fallback={null}>
-          <ChargeurDino hauteurCible={3.5} />
-        </Suspense>
-      </Canvas>
+        {/*
+          IMPORTANT :
+          - `.mp4` est la cible (H.264/AAC).
+          - `.mov` n'est pas toujours lisible sur Chrome/Firefox/Edge (fallback seulement).
+          - `.webm` est optionnel.
+          - L'ordre compte : le navigateur prend le premier format qu'il sait lire.
+        */}
+        {webmSrc ? <source src={webmSrc} type="video/webm" /> : null}
+        {mp4Src ? <source src={mp4Src} type="video/mp4" /> : null}
+        <source src={src} type="video/quicktime" />
+      </video>
+
+      {/* Overlay soft (style studio/VFX) */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/30 via-background/10 to-background" />
+
+      {/* Fallback si le navigateur ne lit pas le .mov */}
+      {videoError && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
+          <p className="text-center text-[11px] tracking-[0.18em] text-muted-foreground">
+            VIDÉO INDISPONIBLE — LANCEMENT…
+          </p>
+        </div>
+      )}
     </div>
-  )
+  );
 }
