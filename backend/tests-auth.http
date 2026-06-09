@@ -1,0 +1,30 @@
+### Fichier de test HTTP pour l'authentification (Extension "REST Client" recommandée sur VS Code)
+
+@baseUrl = http://localhost:3000/api
+
+### 1️⃣ TEST D'INSCRIPTION (REGISTER)
+# Modifie l'email/password si tu le souhaites
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Émile",
+  "email": "emile.dino@test.com",
+  "password": "MonSuperMotDePasse123!"
+}
+
+### 2️⃣ TEST DE CONNEXION (LOGIN)
+# En retour de cette requête, tu obtiendras un "accessToken"
+# Copie-le pour la requête suivante.
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "emile.dino@test.com",
+  "password": "MonSuperMotDePasse123!"
+}
+
+### 3️⃣ TEST DE LA ROUTE SÉCURISÉE (ME)
+# Remplace `COPIE_TON_TOKEN_ICI` par le token obtenu juste au-dessus
+GET {{baseUrl}}/auth/me
+Authorization: Bearer COPIE_TON_TOKEN_ICI
