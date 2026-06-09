@@ -1,5 +1,6 @@
 import { useConnexion } from "../hooks/useConnexion";
 import VideoBackground from "../ui/VideoBackground";
+import "../styles/verre.css";
 import "../styles/connexion.css";
 
 type Props = {
@@ -17,7 +18,7 @@ export default function Connexion({ videoSrc, videoPosition, onConnecte }: Props
       <VideoBackground mp4Src={videoSrc} objectPosition={videoPosition} />
 
       <div className="connexion-contenu">
-        <div className="connexion-panneau">
+        <div className="connexion-panneau verre">
           <p className="connexion-marque">DINO TCG</p>
           <h1 className="connexion-titre">Début de partie</h1>
 

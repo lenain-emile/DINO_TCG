@@ -1,0 +1,50 @@
+/* Effet "liquid glass" (verre dépoli) réutilisable, teinté thème DINO.
+   À poser sur un élément AU-DESSUS d'un fond visible (vidéo/image) pour
+   que le flou ait quelque chose à flouter. */
+
+.verre {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Bordure lumineuse en dégradé (claire en haut/bas, invisible au centre). */
+.verre::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(110, 231, 183, 0.35) 0%,
+    rgba(110, 231, 183, 0.08) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(110, 231, 183, 0.08) 80%,
+    rgba(110, 231, 183, 0.35) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Survol : teinte ambre jurassique + léger soulèvement (cartes interactives). */
+.verre-hover:hover {
+  background: rgba(251, 191, 36, 0.1);
+  transform: translateY(-4px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.verre-hover:hover::before {
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.55) 0%,
+    rgba(251, 191, 36, 0.12) 50%,
+    rgba(251, 191, 36, 0.55) 100%
+  );
+}

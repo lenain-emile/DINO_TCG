@@ -28,11 +28,10 @@
 }
 
 .profil-bloc {
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  background: rgba(6, 78, 59, 0.2);
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
+  /* Fond et flou via .verre. */
 }
 
 .profil-label {

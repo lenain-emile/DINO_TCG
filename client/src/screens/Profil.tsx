@@ -1,4 +1,5 @@
 import { useProfil } from "../hooks/useProfil";
+import "../styles/verre.css";
 import "../styles/profil.css";
 
 export default function Profil({ onRetour }: { onRetour: () => void }) {
@@ -12,7 +13,7 @@ export default function Profil({ onRetour }: { onRetour: () => void }) {
           <h1>Modifier le profil</h1>
         </div>
 
-        <div className="profil-bloc">
+        <div className="profil-bloc verre">
           <label className="profil-label">
             <span>Pseudo joueur</span>
             <input className="profil-champ" value={p.champs.pseudo}
@@ -30,7 +31,7 @@ export default function Profil({ onRetour }: { onRetour: () => void }) {
           </label>
         </div>
 
-        <div className="profil-bloc">
+        <div className="profil-bloc verre">
           <label className="profil-label">
             <span>Mot de passe actuel</span>
             <input className="profil-champ" type="password" value={p.mdpActuel}
