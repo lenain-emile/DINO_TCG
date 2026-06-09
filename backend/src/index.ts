@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { env } from "./config/env";
 import { authRouter } from "./routes/auth.routes";
+import { boosterRouter } from "./routes/booster.routes";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware";
 
 const app = express();
@@ -18,6 +19,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/boosters", boosterRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
