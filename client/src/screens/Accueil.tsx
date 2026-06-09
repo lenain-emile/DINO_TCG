@@ -1,4 +1,7 @@
-import { useAccueil, formaterTemps, BOOSTERS } from "../hooks/useAccueil";
+import { useAccueil, formaterTemps } from "../hooks/useAccueil";
+import Navbar from "../ui/Navbar";
+import { IconeDeconnexion } from "../ui/Icones";
+import "../styles/verre.css";
 import "../styles/accueil.css";
 
 type Props = {
@@ -6,22 +9,15 @@ type Props = {
   onOuvrirProfil: () => void;
 };
 
-const NAV = [
-  { icone: "🏠", nom: "Accueil", actif: true },
-  { icone: "🃏", nom: "Cartes", actif: false },
-  { icone: "➕", nom: "Decks", actif: false },
-  { icone: "⚔️", nom: "Combat", actif: false },
-];
-
 export default function Accueil({ onDeconnexion, onOuvrirProfil }: Props) {
   const a = useAccueil();
-  const booster = BOOSTERS[a.boosterActif];
+  const booster = a.boosters[a.boosterActif];
 
   return (
     <main className="accueil">
       <div className="accueil-contenu">
         {/* En-tête joueur */}
-        <header className="accueil-entete">
+        <header className="accueil-entete verre">
           <div className="accueil-avatar">🦖</div>
           <div className="accueil-infos">
             <p className="accueil-pseudo">{a.joueur?.name ?? "…"}</p>
@@ -36,35 +32,47 @@ export default function Accueil({ onDeconnexion, onOuvrirProfil }: Props) {
             </div>
           </div>
           <div className="accueil-credits">{a.joueur?.nbCredit ?? 0} 🪙</div>
+          <button className="accueil-deconnexion" onClick={onDeconnexion} aria-label="Déconnexion">
+            <IconeDeconnexion className="accueil-deconnexion-icone" />
+          </button>
         </header>
 
-        {/* Boosters disponibles */}
-        <h2 className="accueil-section-titre">BOOSTERS DISPONIBLES ({BOOSTERS.length})</h2>
-        <div
-          className="accueil-pack"
-          style={{
-            background: `radial-gradient(70% 60% at 50% 35%, hsl(${booster.teinte} 80% 45%), hsl(${booster.teinte} 70% 22%) 55%, #0a0f0c)`,
-          }}
-        >
-          <p className="accueil-pack-edition">{booster.edition}</p>
-          <p className="accueil-pack-nom" style={{ color: `hsl(${booster.teinte} 90% 88%)` }}>
-            {booster.nom}
-          </p>
-          <span className="accueil-pack-dino">🦖</span>
-        </div>
+        {/* Boosters disponibles (vrais boosters du joueur) */}
+        <h2 className="accueil-section-titre">BOOSTERS DISPONIBLES ({a.boosters.length})</h2>
 
-        <div className="accueil-points">
-          {BOOSTERS.map((b, i) => (
-            <button
-              key={b.id}
-              className={i === a.boosterActif ? "accueil-point actif" : "accueil-point"}
-              onClick={() => a.setBoosterActif(i)}
-            />
-          ))}
-        </div>
+        {booster ? (
+          <>
+            <div
+              className="accueil-pack"
+              style={{
+                background: `radial-gradient(70% 60% at 50% 35%, hsl(${booster.teinte} 80% 45%), hsl(${booster.teinte} 70% 22%) 55%, #0a0f0c)`,
+              }}
+            >
+              <p className="accueil-pack-edition">×{booster.quantite}</p>
+              <p className="accueil-pack-nom" style={{ color: `hsl(${booster.teinte} 90% 88%)` }}>
+                {booster.nom}
+              </p>
+              <span className="accueil-pack-dino">🦖</span>
+            </div>
+
+            <div className="accueil-points">
+              {a.boosters.map((b, i) => (
+                <button
+                  key={b.id}
+                  className={i === a.boosterActif ? "accueil-point actif" : "accueil-point"}
+                  onClick={() => a.setBoosterActif(i)}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="accueil-pack accueil-pack-vide">
+            <p>Aucun booster pour l’instant</p>
+          </div>
+        )}
 
         {/* Prochain booster gratuit */}
-        <div className="accueil-timer">
+        <div className="accueil-timer verre">
           <p className="accueil-timer-label">PROCHAIN BOOSTER GRATUIT DANS</p>
           <p className="accueil-timer-valeur">{formaterTemps(a.secondes)}</p>
         </div>
@@ -72,16 +80,8 @@ export default function Accueil({ onDeconnexion, onOuvrirProfil }: Props) {
         <button className="accueil-boutique">BOUTIQUE</button>
       </div>
 
-      {/* Navigation bas */}
-      <nav className="accueil-nav">
-        {NAV.map((item) => (
-          <button key={item.nom} className={item.actif ? "accueil-nav-bouton actif" : "accueil-nav-bouton"}>
-            {item.icone}
-          </button>
-        ))}
-        <button className="accueil-nav-bouton" onClick={onOuvrirProfil}>👤</button>
-        <button className="accueil-nav-bouton" onClick={onDeconnexion}>⎋</button>
-      </nav>
+      {/* Navigation bas avec bulle liquid glass */}
+      <Navbar onOuvrirProfil={onOuvrirProfil} />
     </main>
   );
 }

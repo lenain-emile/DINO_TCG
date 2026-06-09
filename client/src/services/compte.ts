@@ -48,6 +48,16 @@ export async function lireProfil() {
   };
 }
 
+// Récupère les boosters détenus par le joueur connecté.
+export async function lireBoosters() {
+  const reponse = await fetch(`${URL_API}/boosters/detenus`, {
+    headers: { Authorization: `Bearer ${jeton()}` },
+  });
+  const json = await reponse.json();
+  if (!reponse.ok || !json.success) throw new Error("Boosters indisponibles.");
+  return json.data as { id: string; name: string; price: number; quantity: number }[];
+}
+
 // Met à jour le profil (on n'envoie que les champs fournis).
 export async function modifierProfil(champs: Record<string, string>) {
   const reponse = await fetch(`${URL_API}/auth/profile`, {

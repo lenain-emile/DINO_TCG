@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { lireProfil } from "../services/compte";
+import { lireProfil, lireBoosters } from "../services/compte";
 
 // XP nécessaire pour passer un niveau (placeholder).
 const XP_PAR_NIVEAU = 350;
@@ -11,12 +11,19 @@ export type Joueur = {
   xp: number;
 };
 
-// Boosters disponibles : faux pour l'instant (pas encore de route backend).
-export const BOOSTERS = [
-  { id: "dinomite", nom: "DinoMite", teinte: 18, edition: "ÉDITION FEU" },
-  { id: "jurassic", nom: "Jurassic", teinte: 140, edition: "ÉDITION JUNGLE" },
-  { id: "glacius", nom: "Glacius", teinte: 200, edition: "ÉDITION GLACE" },
-];
+export type Booster = {
+  id: string;
+  nom: string;
+  quantite: number;
+  teinte: number; // déco visuelle (déduite du nom)
+};
+
+// Teinte de couleur déduite du nom du booster (pure décoration front).
+function teinteDepuisNom(nom: string): number {
+  let somme = 0;
+  for (const c of nom) somme += c.charCodeAt(0);
+  return somme % 360;
+}
 
 // Compte à rebours de départ du booster gratuit (3h34).
 const DEPART_SECONDES = 3 * 3600 + 34 * 60 + 27;
@@ -32,6 +39,7 @@ export function formaterTemps(secondes: number): string {
 
 export function useAccueil() {
   const [joueur, setJoueur] = useState<Joueur | null>(null);
+  const [boosters, setBoosters] = useState<Booster[]>([]);
   const [boosterActif, setBoosterActif] = useState(0);
   const [secondes, setSecondes] = useState(DEPART_SECONDES);
 
@@ -40,6 +48,22 @@ export function useAccueil() {
     lireProfil()
       .then((d) => setJoueur(d.gamers[0] ?? null))
       .catch(() => setJoueur(null));
+  }, []);
+
+  // Charge les vrais boosters détenus par le joueur (depuis le backend).
+  useEffect(() => {
+    lireBoosters()
+      .then((liste) =>
+        setBoosters(
+          liste.map((b) => ({
+            id: b.id,
+            nom: b.name,
+            quantite: b.quantity,
+            teinte: teinteDepuisNom(b.name),
+          })),
+        ),
+      )
+      .catch(() => setBoosters([]));
   }, []);
 
   // Décrémente le compte à rebours.
@@ -52,5 +76,5 @@ export function useAccueil() {
 
   const ratioXp = joueur ? Math.min(1, (joueur.xp % XP_PAR_NIVEAU) / XP_PAR_NIVEAU) : 0;
 
-  return { joueur, boosterActif, setBoosterActif, secondes, ratioXp, XP_PAR_NIVEAU };
+  return { joueur, boosters, boosterActif, setBoosterActif, secondes, ratioXp, XP_PAR_NIVEAU };
 }

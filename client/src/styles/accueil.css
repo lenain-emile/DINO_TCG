@@ -18,10 +18,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  background: rgba(6, 78, 59, 0.3);
   border-radius: 16px;
   padding: 12px;
+  /* Fond et flou via .verre. */
 }
 
 .accueil-avatar {
@@ -133,6 +132,12 @@
   font-size: 48px;
 }
 
+.accueil-pack-vide {
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(167, 243, 208, 0.6);
+  font-size: 14px;
+}
+
 .accueil-points {
   display: flex;
   justify-content: center;
@@ -157,11 +162,10 @@
 /* ===== Timer ===== */
 .accueil-timer {
   margin-top: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.3);
   border-radius: 16px;
   padding: 16px;
   text-align: center;
+  /* Fond et flou via .verre. */
 }
 
 .accueil-timer-label {
@@ -191,31 +195,23 @@
   cursor: pointer;
 }
 
-/* ===== Navigation bas ===== */
-.accueil-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-width: 420px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(10, 15, 12, 0.9);
-  padding: 12px 8px;
-}
-
-.accueil-nav-bouton {
+/* Petit bouton déconnexion dans le header. */
+.accueil-deconnexion {
+  display: grid;
+  place-items: center;
   background: none;
   border: none;
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  padding: 6px 16px;
+  padding: 4px;
+  transition: color 0.2s ease;
 }
 
-.accueil-nav-bouton.actif {
-  color: #6ee7b7;
+.accueil-deconnexion:hover {
+  color: #fcd34d;
+}
+
+.accueil-deconnexion-icone {
+  width: 18px;
+  height: 18px;
 }
