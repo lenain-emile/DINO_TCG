@@ -1,49 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import IntroDino from './Intro-dino/intro'
+import { useState } from "react";
+import "./App.css";
+import IntroDino from "./Intro-dino/intro.tsx";
+import Connexion from "./screens/Connexion.tsx";
+import Accueil from "./screens/Accueil.tsx";
+import Profil from "./screens/Profil.tsx";
+
+type Screen = "home" | "game" | "profile";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api";
+
+const HOME_VIDEO_SRC_MP4 = "/Model/Comp_1.mp4";
+const HOME_VIDEO_OBJECT_POSITION = "85% 50%"; // cadrage: dino visible côté droit
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Intro : jouée une seule fois au démarrage.
+  const [showIntro, setShowIntro] = useState(true);
+  const [screen, setScreen] = useState<Screen>("home");
 
-  // 1. État (State) pour savoir si on doit afficher l'intro
-  // Mettre à "true" par défaut pour qu'elle s'affiche au lancement du site
-  const [afficherIntro, setAfficherIntro] = useState(true)
+  async function handleLogout() {
+    const refreshToken = localStorage.getItem("refreshToken");
+    try {
+      if (refreshToken) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+      }
+    } catch {
+      // logout best-effort : on nettoie côté client quoi qu'il arrive.
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      setScreen("home");
+    }
+  }
+
+  if (showIntro) {
+    return (
+      <IntroDino
+        dureeEnMillisecondes={6000}
+        surIntroTerminee={() => setShowIntro(false)}
+        mp4Src="/Model/Comp_1.mp4"
+        src="/Model/Comp_1.mov"
+        objectPosition="50% 50%"
+      />
+    );
+  }
+
+  if (screen === "profile") {
+    return <Profil onRetour={() => setScreen("game")} />;
+  }
+
+  if (screen === "game") {
+    return (
+      <Accueil
+        onDeconnexion={handleLogout}
+        onOuvrirProfil={() => setScreen("profile")}
+      />
+    );
+  }
 
   return (
-    <>
-      {/* 2. Affichage conditionnel de l'intro */}
-      {afficherIntro && (
-        <IntroDino 
-          dureeEnMillisecondes={6000} // On fixe la durée ici de manière très lisible
-          surIntroTerminee={() => setAfficherIntro(false)} // Quand l'intro dit "stop", on cache le composant
-        />
-      )}
-
-      {/* 3. Le reste du jeu (qui fonctionnera en fond le temps de l'intro) */}
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Connexion
+      videoSrc={HOME_VIDEO_SRC_MP4}
+      videoPosition={HOME_VIDEO_OBJECT_POSITION}
+      onConnecte={() => setScreen("game")}
+    />
+  );
 }
 
-export default App
+export default App;
