@@ -1,54 +1,74 @@
-import { useState } from 'react';
-import data from './shared/data/dinosaurs.json';
-import { CardTCG } from './shared/ui/CardTCG.tsx';
-import { Navbar } from './shared/ui/Navbar.tsx';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
+import IntroDino from "./Intro-dino/intro.tsx";
+import Connexion from "./screens/Connexion.tsx";
+import Accueil from "./screens/Accueil.tsx";
+import Profil from "./screens/Profil.tsx";
+
+type Screen = "home" | "game" | "profile";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api";
+
+const HOME_VIDEO_SRC_MP4 = "/Model/Comp_1.mp4";
+const HOME_VIDEO_OBJECT_POSITION = "85% 50%"; // cadrage: dino visible côté droit
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('collection'); // Page par défaut
+  // Intro : jouée une seule fois au démarrage.
+  const [showIntro, setShowIntro] = useState(true);
+  const [screen, setScreen] = useState<Screen>("home");
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <div style={pagePadding}><h1>Bienvenue, Dresseur !</h1><p>Prêt pour un duel ?</p></div>;
-      
-      case 'collection':
-        return (
-          <div style={pagePadding}>
-            <h1 style={{ textAlign: 'center' }}>Ma Collection</h1>
-            <div className="deck-grid">
-              {data.cartes_dinosaures.map((dino) => (
-                <CardTCG key={dino.id} dino={dino} />
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'decks':
-        return <div style={pagePadding}><h1>Mes Decks</h1><p>Créez votre équipe de choc ici.</p></div>;
-
-      default:
-        return <div style={pagePadding}><h1>Bientôt disponible</h1></div>;
+  async function handleLogout() {
+    const refreshToken = localStorage.getItem("refreshToken");
+    try {
+      if (refreshToken) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+      }
+    } catch {
+      // logout best-effort : on nettoie côté client quoi qu'il arrive.
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      setScreen("home");
     }
-  };
+  }
+
+  if (showIntro) {
+    return (
+      <IntroDino
+        dureeEnMillisecondes={6000}
+        surIntroTerminee={() => setShowIntro(false)}
+        mp4Src="/Model/Comp_1.mp4"
+        src="/Model/Comp_1.mov"
+        objectPosition="50% 50%"
+      />
+    );
+  }
+
+  if (screen === "profile") {
+    return <Profil onRetour={() => setScreen("game")} />;
+  }
+
+  if (screen === "game") {
+    return (
+      <Accueil
+        onDeconnexion={handleLogout}
+        onOuvrirProfil={() => setScreen("profile")}
+      />
+    );
+  }
 
   return (
-    <div className="app-container">
-      {/* Contenu dynamique */}
-      <main style={{ paddingBottom: '80px' }}> {/* On laisse de la place pour la navbar */}
-        {renderPage()}
-      </main>
-
-      {/* Barre de navigation fixe */}
-      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-    </div>
+    <Connexion
+      videoSrc={HOME_VIDEO_SRC_MP4}
+      videoPosition={HOME_VIDEO_OBJECT_POSITION}
+      onConnecte={() => setScreen("game")}
+    />
   );
 }
-
-const pagePadding: React.CSSProperties = {
-  padding: '20px',
-  maxWidth: '1200px',
-  margin: '0 auto'
-};
 
 export default App;
