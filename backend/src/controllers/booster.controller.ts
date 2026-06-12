@@ -5,14 +5,14 @@ import { prisma } from "../lib/prisma";
 // ---------------------------------------------------------------------------
 // Tire une rareté au sort selon les probabilités de la DB
 // ---------------------------------------------------------------------------
-function pickRarityId(rarities: { id: string; probability: unknown }[]): string {
+function pickRarityId(rarities: { id: string; probability: number }[]): string {
   const roll = Math.random();
   let cumulative = 0;
   for (const r of rarities) {
     cumulative += Number(r.probability);
     if (roll <= cumulative) return r.id;
   }
-  return rarities[rarities.length - 1].id; // fallback dernière rareté
+  return rarities?[rarities.length - 1].id; // fallback dernière rareté
 }
 
 /**

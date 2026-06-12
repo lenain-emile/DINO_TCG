@@ -4,6 +4,7 @@ import { env } from "./config/env";
 import { authRouter } from "./routes/auth.routes";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware";
 import { boosterRouter } from "./routes/booster.routes";
+import { gamerRouter } from "./routes/gamer.routes";
 
 const app = express();
 const PORT = env.port;
@@ -19,6 +20,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/gamer", gamerRouter);
 app.use("/api/boosters", boosterRouter);
 
 app.use(notFoundHandler);
